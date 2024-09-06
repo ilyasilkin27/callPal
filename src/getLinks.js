@@ -10,6 +10,8 @@ const loginToAmoCRM = async (page) => {
   await page.type("#session_end_login", AMOCRM_EMAIL);
   await page.type("#password", AMOCRM_PASSWORD);
   await page.click("#auth_submit");
+
+  await page.waitForNavigation({ waitUntil: 'networkidle2' });
 };
 
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -19,31 +21,27 @@ const searchDeals = async (page, email) => {
   await page.click("#search_input");
   await page.type("#search_input", email);
 
-  await page.waitForFunction(
-    () => {
-      const container = document.querySelector(
-        "#search-suggest-drop-down-menu_container"
-      );
-      return (
-        container &&
-        (container.querySelectorAll(
-          ".search-results__row-section__right-column__result.js-search-suggest-result"
-        ).length > 0 ||
-          container.querySelector(".no-result"))
-      );
-    },
-    { timeout: 3000 }
-  );
-
-  await wait(3000);
+  try {
+    await page.waitForFunction(
+      () => {
+        const container = document.querySelector("#search-suggest-drop-down-menu_container");
+        if (!container) return false;
+        const results = container.querySelectorAll(".search-results__row-section__right-column__result.js-search-suggest-result");
+        const noResults = container.querySelector(".no-result");
+        return results.length > 0 || noResults;
+      },
+      { timeout: 15000 }
+    );
+  } catch (error) {
+    console.error(`Ошибка ожидания результатов для ${email}: ${error.message}`);
+    return null;
+  }
 
   const noResult = await page.$(".no-result");
   if (noResult) {
     console.log(`По запросу ${email} сделок не найдено`);
     return `По запросу ${email} сделок не найдено`;
   }
-
-  await wait(3000);
 
   const firstDealLink = await page
     .$eval(".js-navigate-link-search-suggest", (link) => link.href)
@@ -71,11 +69,10 @@ export default async (emails) => {
       dealLinks.push(dealLink);
     }
 
-    await wait(3000);
-
-    await page.evaluate(
-      () => (document.querySelector("#search_input").value = "")
-    );
+    await page.evaluate(() => {
+      const searchInput = document.querySelector("#search_input");
+      if (searchInput) searchInput.value = "";
+    });
 
     await wait(3000);
   }
