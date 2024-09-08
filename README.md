@@ -9,6 +9,7 @@
    ```bash
    git clone git@github.com:ilyasilkin27/callPal.git
    ```
+
    ```bash
    cd callPal
    ```
