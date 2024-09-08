@@ -7,8 +7,8 @@
 1. Клонируйте репозиторий:
 
    ```bash
-   git clone <URL_ВАШЕГО_РЕПОЗИТОРИЯ>
-   cd <ИМЯ_ДИРЕКТОРИИ>
+   git clone git@github.com:ilyasilkin27/callPal.git
+   cd callPal
    ```
 
 2. Установите зависимости:
