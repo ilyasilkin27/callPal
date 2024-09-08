@@ -3,12 +3,12 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const config = {
-  API_URL: process.env.API_URL,
-  API_KEY: process.env.API_KEY,
-};
-
 export default async (ids) => {
+  const config = {
+    API_URL: process.env.API_URL,
+    API_KEY: process.env.API_KEY,
+  };  
+
   const emails = [];
 
   try {

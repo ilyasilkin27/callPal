@@ -1,32 +1,37 @@
 import puppeteer from "puppeteer";
 import dotenv from "dotenv";
+import wait from "./utils/wait.js";
 
 dotenv.config();
 
-const { AMOCRM_URL, AMOCRM_EMAIL, AMOCRM_PASSWORD } = process.env;
-
 const loginToAmoCRM = async (page) => {
+  const { AMOCRM_URL, AMOCRM_EMAIL, AMOCRM_PASSWORD } = process.env;
+
   await page.goto(AMOCRM_URL);
   await page.type("#session_end_login", AMOCRM_EMAIL);
   await page.type("#password", AMOCRM_PASSWORD);
   await page.click("#auth_submit");
 
-  await page.waitForNavigation({ waitUntil: 'networkidle2' });
+  await page.waitForNavigation({ waitUntil: "networkidle2" });
 };
-
-const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const searchDeals = async (page, email) => {
   await page.waitForSelector("#search_input", { visible: true });
   await page.click("#search_input");
   await page.type("#search_input", email);
 
+  await wait(2000);
+
   try {
     await page.waitForFunction(
       () => {
-        const container = document.querySelector("#search-suggest-drop-down-menu_container");
+        const container = document.querySelector(
+          "#search-suggest-drop-down-menu_container"
+        );
         if (!container) return false;
-        const results = container.querySelectorAll(".search-results__row-section__right-column__result.js-search-suggest-result");
+        const results = container.querySelectorAll(
+          ".search-results__row-section__right-column__result.js-search-suggest-result"
+        );
         const noResults = container.querySelector(".no-result");
         return results.length > 0 || noResults;
       },
@@ -57,7 +62,7 @@ const searchDeals = async (page, email) => {
 };
 
 export default async (emails) => {
-  const browser = await puppeteer.launch({ headless: false });
+  const browser = await puppeteer.launch({ headless: true });
   const page = await browser.newPage();
   const dealLinks = [];
 
@@ -77,7 +82,7 @@ export default async (emails) => {
     await wait(3000);
   }
 
-  console.log("Финальный массив ссылок на сделки:", dealLinks);
   await browser.close();
+  console.log("Финальный массив ссылок на сделки:", dealLinks);
   return dealLinks;
 };
