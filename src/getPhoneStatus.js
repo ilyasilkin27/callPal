@@ -41,7 +41,7 @@ const typeId = async (page, id) => {
 
   await page.click('input[placeholder="Id организации"]');
   await page.type('input[placeholder="Id организации"]', id);
-  await wait (1000);
+  await wait(1000);
 };
 
 const clickButtonWithText = async (page, buttonText) => {
@@ -71,26 +71,42 @@ const checkPhoneStatus = async (page, ids) => {
     await wait(500);
     await page.waitForSelector('a[title="WhatsApp аккаунты"]');
     await page.click('a[title="WhatsApp аккаунты"]');
-    await wait(500);
+    await wait(1000);
 
-    const connectionStatus = await page.evaluate(() => {
-      const statusElement = Array.from(document.querySelectorAll("p")).find(
-        (el) => el.textContent.includes("Статус подключения:")
+    try {
+      await page.waitForFunction(
+        () => {
+          return (
+            document.body.innerText.includes("Требует перехода по QR-коду") ||
+            document.body.innerText.includes("Заблокирован")
+          );
+        },
+        { timeout: 3000 }
       );
 
-      if (statusElement) {
-        const statusText = statusElement.nextElementSibling;
-        return statusText ? statusText.textContent.trim() : "Не найдено";
+      const connectionStatus = await page.evaluate(() => {
+        const pageContent = document.body.innerText;
+
+        if (pageContent.includes("Требует перехода по QR-коду")) {
+          return "Требует перехода по QR-коду";
+        }
+
+        if (pageContent.includes("Заблокирован")) {
+          return "Заблокирован";
+        }
+
+        return "Работает";
+      });
+
+      if (connectionStatus !== "Работает") {
+        results.push({ id, status: connectionStatus });
+        console.log(`ID: ${id} - Status: ${connectionStatus}`);
+      } else {
+        console.log(`ID: ${id} - Status: Работает`);
       }
-
-      return "Не найдено";
-    });
-
-    if (!connectionStatus.includes("Работает")) {
-      results.push({ id, status: connectionStatus });
-      console.log(`ID: ${id} - Status: ${connectionStatus} (не работает)`);
-    } else {
-      console.log(`ID: ${id} - Status: работает`);
+    } catch (error) {
+      results.push({ id, status: "Работает" });
+      console.log(`ID: ${id} - Status: Работает`);
     }
   }
 
@@ -99,14 +115,21 @@ const checkPhoneStatus = async (page, ids) => {
 
 const goBack = async (page) => {
   await page.waitForSelector('a.nb-transition[href*="organizationId"]');
-  await wait(1500);
+  await wait(2000);
   await page.click('a.nb-transition[href*="organizationId"]');
   await page.waitForNavigation();
 };
 
 export default async (ids) => {
-  const browser = await puppeteer.launch({ headless: true });
+  const browser = await puppeteer.launch({
+    headless: false,
+    args: ["--windwos-size=1920,1080"],
+  });
   const page = await browser.newPage();
+  await page.setViewport({
+    width: 1920,
+    height: 1080,
+  });
 
   try {
     await login(page);

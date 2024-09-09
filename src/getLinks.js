@@ -62,7 +62,7 @@ const searchDeals = async (page, email) => {
 };
 
 export default async (emails) => {
-  const browser = await puppeteer.launch({ headless: true });
+  const browser = await puppeteer.launch({ headless: false });
   const page = await browser.newPage();
   const dealLinks = [];
 
