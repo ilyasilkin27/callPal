@@ -6,8 +6,8 @@ import getPhoneStatus from "./src/getPhoneStatus.js";
 const main = async () => {
   const ids = createIds();
   const mails = await getMails(ids);
-  const links = await getLinks(mails);
-  const phones = await getPhoneStatus(ids);
+  await getLinks(mails);
+  await getPhoneStatus(ids);
 };
 
 main();
