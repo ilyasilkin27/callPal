@@ -1,53 +1,40 @@
 # CallPal
 
-Консольное приложение предназначенное для автоматического поиска сделок по email-адресам в системе amoCRM с использованием Puppeteer. Также, приложение проверяет статус номера в Revvy. Пользователь вводит список ID, и скрипт выполняет поиск сделок по этим ID, возвращая ссылки на найденные сделки.
+Консольное приложение для автоматизации ежедневной сверки в отделе продаж: по списку ID организаций находит связанные сделки в amoCRM по email и проверяет статус подключения WhatsApp-канала в Revvy. То, что раньше делалось руками по каждому клиенту, теперь прогоняется одним скриптом.
+
+## Стек
+
+Node.js, Puppeteer (браузерная автоматизация amoCRM и Revvy), axios (внутреннее API).
 
 ## Установка
 
-1. Клонируйте репозиторий:
+```bash
+git clone git@github.com:ilyayaya27/callPal.git
+cd callPal
+npm install
+cp .env.example .env
+```
 
-   ```bash
-   git clone git@github.com:ilyasilkin27/callPal.git
-   ```
-
-   ```bash
-   cd callPal
-   ```
-
-2. Установите зависимости:
-
-   ```bash
-   npm install
-   ```
-
-3. Нужны креды, которые хранятся у меня. (:
+Заполните `.env` своими доступами (см. `.env.example`) — креды приватные, для конкретной amoCRM/Revvy-инсталляции, публично не раздаются.
 
 ## Запуск
 
-1. Добавьте ID в массив по пути `src/utils/ids.js`.
-
-2. Для запуска скрипта, используйте команду:
+1. Добавьте ID организаций в массив в `src/utils/ids.js`.
+2. Запустите:
 
    ```bash
    npm start
    ```
 
-## Пример финального вывода
+## Пример вывода
 
 ```bash
-username@username:~/lead-searcher$ npm start
+$ npm start
 
-> lead-searcher@1.0.0 start
-> node index.js
-
-Email для ID id1-exmaple: email1@example.ru
-Email для ID id2-exmaple: email2@example.ru
-Ссылка на первую сделку: https://new_id_exmaple.amocrm.ru/leads/detail/id_exmaple
+Email для ID id1-example: email1@example.ru
+Ссылка на первую сделку: https://example.amocrm.ru/leads/detail/12345
 По запросу email2@example.ru сделок не найдено
-Финальный массив ссылок на сделки: [
-  'https://new_id_exmaple.amocrm.ru/leads/detail/id_exmaple',
-  'По запросу email2@example.ru сделок не найдено'
-]
-ID: id1-exmaple - Status: работает
-ID: id2-exmaple - Status: Требует перехода по QR-коду (не работает)
+
+ID: id1-example - Status: Требует перехода по QR-коду (не работает)
+ID: id2-example - Status: Работает
 ```
